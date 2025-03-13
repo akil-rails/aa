@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Bank and AA Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: #f8fafc;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        .disabled {
+            background-color: #f1f1f1;
+            cursor: not-allowed;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .checkbox-container:hover {
+            background-color: #f0f4f8;
+        }
+        .checkbox-container input {
+            width: auto;
+            margin-right: 8px;
+        }
+        .aa-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            border-left: 4px solid #4299e1;
+        }
+        .bank-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .bank-badge {
+            background-color: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .handle-input {
+            display: flex;
+            align-items: center;
+        }
+        .handle-input input {
+            flex: 1;
+        }
+        .handle-input span {
+            margin-left: 5px;
+            font-size: 16px;
+            color: #4a5568;
+        }
+        .no-common-message {
+            color: #e53e3e;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff5f5;
+            border-radius: 4px;
+            border-left: 4px solid #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multi-Bank and AA Selection</h1>
+    
+    <form id="selectionForm">
+        <div class="form-section">
+            <h2>Step 1: Choose your banks</h2>
+            <div class="checkbox-group" id="bankSelection">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="bank" value="ICICI"> ICICI
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" name="bank" value="SBI"> SBI
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" name="bank" value="RBL"> RBL
+                </label>
+                <label class="checkbox-container">
+                    <input type="checkbox" name="bank" value="FEDERAL"> FEDERAL
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2>Step 2: Select Account Aggregators</h2>
+            <div id="aaSelectionContainer">
+                <!-- AA selection content will be generated dynamically -->
+                <p>Please select at least one bank to see available Account Aggregators.</p>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        // Define the mapping of banks to their corresponding AA options
+        const bankToAAMapping = {
+            'SBI': ['Anumati', 'Finvu', 'Onemoney'],
+            'FEDERAL': ['Anumati', 'Finvu', 'Onemoney', 'Ink'],
+            'RBL': ['Onemoney'],
+            'ICICI': ['Anumati']
+        };
+
+        // Get references to elements
+        const bankCheckboxes = document.querySelectorAll('input[name="bank"]');
+        const aaSelectionContainer = document.getElementById('aaSelectionContainer');
+
+        // Add event listeners to bank checkboxes
+        bankCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateAAOptions);
+        });
+
+        // Function to update AA options based on selected banks
+        function updateAAOptions() {
+            // Get all selected banks
+            const selectedBanks = Array.from(bankCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            // Clear the AA selection container
+            aaSelectionContainer.innerHTML = '';
+
+            // If no banks selected, show message
+            if (selectedBanks.length === 0) {
+                aaSelectionContainer.innerHTML = '<p>Please select at least one bank to see available Account Aggregators.</p>';
+                return;
+            }
+
+            // Find common AAs for all selected banks
+            let commonAAs = findCommonAAs(selectedBanks);
+
+            // If there are common AAs
+            if (commonAAs.length > 0) {
+                // Create a section for common AAs
+                const commonAASection = document.createElement('div');
+                commonAASection.className = 'aa-section';
+                
+                // Create bank badges
+                const bankBadgesDiv = document.createElement('div');
+                bankBadgesDiv.className = 'bank-badges';
+                selectedBanks.forEach(bank => {
+                    const badge = document.createElement('span');
+                    badge.className = 'bank-badge';
+                    badge.textContent = bank;
+                    bankBadgesDiv.appendChild(badge);
+                });
+                
+                // Create common AA select dropdown
+                const selectGroup = document.createElement('div');
+                selectGroup.className = 'form-group';
+                
+                const selectLabel = document.createElement('label');
+                selectLabel.textContent = 'Common Account Aggregator for all selected banks';
+                selectLabel.htmlFor = 'commonAASelect';
+                
+                const aaSelect = document.createElement('select');
+                aaSelect.id = 'commonAASelect';
+                aaSelect.name = 'commonAA';
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select an Account Aggregator';
+                aaSelect.appendChild(defaultOption);
+                
+                // Add options for common AAs
+                commonAAs.forEach(aa => {
+                    const option = document.createElement('option');
+                    option.value = aa;
+                    option.textContent = aa;
+                    aaSelect.appendChild(option);
+                });
+                
+                // Create AA handle input field
+                const handleGroup = document.createElement('div');
+                handleGroup.className = 'form-group';
+                
+                const handleLabel = document.createElement('label');
+                handleLabel.textContent = 'AA Handle';
+                handleLabel.htmlFor = 'commonAAHandle';
+                
+                const handleInputContainer = document.createElement('div');
+                handleInputContainer.className = 'handle-input';
+                
+                const handleInput = document.createElement('input');
+                handleInput.type = 'text';
+                handleInput.id = 'commonAAHandle';
+                handleInput.name = 'commonAAHandle';
+                handleInput.placeholder = 'Enter your handle';
+                
+                const handleSuffix = document.createElement('span');
+                handleSuffix.id = 'commonAASuffix';
+                handleSuffix.textContent = '@';
+                
+                // Add event listener to update suffix
+                aaSelect.addEventListener('change', function() {
+                    handleSuffix.textContent = this.value ? '@' + this.value : '@';
+                });
+                
+                // Assemble the elements
+                handleInputContainer.appendChild(handleInput);
+                handleInputContainer.appendChild(handleSuffix);
+                
+                handleGroup.appendChild(handleLabel);
+                handleGroup.appendChild(handleInputContainer);
+                
+                selectGroup.appendChild(selectLabel);
+                selectGroup.appendChild(aaSelect);
+                
+                commonAASection.appendChild(bankBadgesDiv);
+                commonAASection.appendChild(selectGroup);
+                commonAASection.appendChild(handleGroup);
+                
+                aaSelectionContainer.appendChild(commonAASection);
+            } else {
+                // No common AAs, need to group banks by their AAs
+                const message = document.createElement('div');
+                message.className = 'no-common-message';
+                message.textContent = 'There are no common Account Aggregators for all selected banks. Please select AAs for each bank group below.';
+                aaSelectionContainer.appendChild(message);
+                
+                // Group banks by common AAs
+                const bankGroups = groupBanksByCommonAAs(selectedBanks);
+                
+                // Create sections for each bank group
+                bankGroups.forEach((group, groupIndex) => {
+                    const groupSection = document.createElement('div');
+                    groupSection.className = 'aa-section';
+                    
+                    // Create bank badges for this group
+                    const bankBadgesDiv = document.createElement('div');
+                    bankBadgesDiv.className = 'bank-badges';
+                    group.banks.forEach(bank => {
+                        const badge = document.createElement('span');
+                        badge.className = 'bank-badge';
+                        badge.textContent = bank;
+                        bankBadgesDiv.appendChild(badge);
+                    });
+                    
+                    // Create AA select dropdown for this group
+                    const selectGroup = document.createElement('div');
+                    selectGroup.className = 'form-group';
+                    
+                    const selectLabel = document.createElement('label');
+                    selectLabel.textContent = 'Account Aggregator for this bank group';
+                    selectLabel.htmlFor = `aaSelect_${groupIndex}`;
+                    
+                    const aaSelect = document.createElement('select');
+                    aaSelect.id = `aaSelect_${groupIndex}`;
+                    aaSelect.name = `aa_${groupIndex}`;
+                    
+                    // Add default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select an Account Aggregator';
+                    aaSelect.appendChild(defaultOption);
+                    
+                    // Add options for this group's AAs
+                    group.commonAAs.forEach(aa => {
+                        const option = document.createElement('option');
+                        option.value = aa;
+                        option.textContent = aa;
+                        aaSelect.appendChild(option);
+                    });
+                    
+                    // Create AA handle input field for this group
+                    const handleGroup = document.createElement('div');
+                    handleGroup.className = 'form-group';
+                    
+                    const handleLabel = document.createElement('label');
+                    handleLabel.textContent = 'AA Handle';
+                    handleLabel.htmlFor = `aaHandle_${groupIndex}`;
+                    
+                    const handleInputContainer = document.createElement('div');
+                    handleInputContainer.className = 'handle-input';
+                    
+                    const handleInput = document.createElement('input');
+                    handleInput.type = 'text';
+                    handleInput.id = `aaHandle_${groupIndex}`;
+                    handleInput.name = `aaHandle_${groupIndex}`;
+                    handleInput.placeholder = 'Enter your handle';
+                    
+                    const handleSuffix = document.createElement('span');
+                    handleSuffix.id = `aaSuffix_${groupIndex}`;
+                    handleSuffix.textContent = '@';
+                    
+                    // Add event listener to update suffix
+                    aaSelect.addEventListener('change', function() {
+                        handleSuffix.textContent = this.value ? '@' + this.value : '@';
+                    });
+                    
+                    // Assemble the elements
+                    handleInputContainer.appendChild(handleInput);
+                    handleInputContainer.appendChild(handleSuffix);
+                    
+                    handleGroup.appendChild(handleLabel);
+                    handleGroup.appendChild(handleInputContainer);
+                    
+                    selectGroup.appendChild(selectLabel);
+                    selectGroup.appendChild(aaSelect);
+                    
+                    groupSection.appendChild(bankBadgesDiv);
+                    groupSection.appendChild(selectGroup);
+                    groupSection.appendChild(handleGroup);
+                    
+                    aaSelectionContainer.appendChild(groupSection);
+                });
+            }
+        }
+
+        // Function to find common AAs across all selected banks
+        function findCommonAAs(selectedBanks) {
+            if (selectedBanks.length === 0) return [];
+            
+            // Get the AA options for the first bank
+            let commonAAs = [...bankToAAMapping[selectedBanks[0]]];
+            
+            // Iterate through the rest of the banks
+            for (let i = 1; i < selectedBanks.length; i++) {
+                const bankAAs = bankToAAMapping[selectedBanks[i]];
+                // Keep only the AAs that are common
+                commonAAs = commonAAs.filter(aa => bankAAs.includes(aa));
+            }
+            
+            return commonAAs;
+        }
+
+        // Function to group banks by common AAs
+        function groupBanksByCommonAAs(selectedBanks) {
+            let groups = [];
+            
+            // Process each bank
+            for (const bank of selectedBanks) {
+                let added = false;
+                
+                // Try to add to an existing group
+                for (const group of groups) {
+                    // Check if this bank shares any AAs with the group
+                    const bankAAs = bankToAAMapping[bank];
+                    const commonWithGroup = bankAAs.filter(aa => group.commonAAs.includes(aa));
+                    
+                    if (commonWithGroup.length > 0) {
+                        // Bank shares AAs with this group, add it
+                        group.banks.push(bank);
+                        // Update common AAs for the group
+                        group.commonAAs = commonWithGroup;
+                        added = true;
+                        break;
+                    }
+                }
+                
+                // If not added to any existing group, create a new group
+                if (!added) {
+                    groups.push({
+                        banks: [bank],
+                        commonAAs: [...bankToAAMapping[bank]]
+                    });
+                }
+            }
+            
+            // Merge groups that now have common AAs (due to transitive relationships)
+            let merged = true;
+            while (merged) {
+                merged = false;
+                
+                for (let i = 0; i < groups.length; i++) {
+                    for (let j = i + 1; j < groups.length; j++) {
+                        // Check if groups share any AAs
+                        const commonAAs = groups[i].commonAAs.filter(aa => 
+                            groups[j].commonAAs.includes(aa));
+                        
+                        if (commonAAs.length > 0) {
+                            // Merge groups
+                            groups[i].banks = [...groups[i].banks, ...groups[j].banks];
+                            groups[i].commonAAs = commonAAs;
+                            groups.splice(j, 1);
+                            merged = true;
+                            break;
+                        }
+                    }
+                    if (merged) break;
+                }
+            }
+            
+            return groups;
+        }
+    </script>
+</body>
+</html>
