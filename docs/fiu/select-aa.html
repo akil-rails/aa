@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank and AA Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        .disabled {
+            background-color: #f1f1f1;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bank and AA Selection</h1>
+    
+    <form id="selectionForm">
+        <div class="form-group">
+            <label for="bankSelect">Choose your bank</label>
+            <select id="bankSelect" name="bank">
+                <option value="">Select a bank</option>
+                <option value="ICICI">ICICI</option>
+                <option value="SBI">SBI</option>
+                <option value="RBL">RBL</option>
+                <option value="FEDERAL">FEDERAL</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="aaSelect">Choose your Account Aggregator</label>
+            <select id="aaSelect" name="aa" disabled class="disabled">
+                <option value="">Select a bank first</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="aaHandle">AA Handle</label>
+            <div style="display: flex; align-items: center;">
+                <input type="text" id="aaHandle" name="aaHandle" placeholder="Enter your handle" style="flex: 1;">
+                <span id="aaSuffix" style="margin-left: 5px; font-size: 16px;">@</span>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        // Define the mapping of banks to their corresponding AA options
+        const bankToAAMapping = {
+            'SBI': ['Anumati', 'Finvu', 'Onemoney'],
+            'FEDERAL': ['Anumati', 'Finvu', 'Onemoney', 'Ink'],
+            'RBL': ['Onemoney'],
+            'ICICI': ['Anumati', 'Onemoney']
+        };
+
+        // Get references to the select elements
+        const bankSelect = document.getElementById('bankSelect');
+        const aaSelect = document.getElementById('aaSelect');
+
+        // Get reference to AA suffix span
+        const aaSuffix = document.getElementById('aaSuffix');
+        
+        // Add event listener to AA select
+        aaSelect.addEventListener('change', function() {
+            // Get the selected AA
+            const selectedAA = this.value;
+            
+            // Update the suffix text
+            if (selectedAA) {
+                aaSuffix.textContent = '@' + selectedAA;
+            } else {
+                aaSuffix.textContent = '@';
+            }
+        });
+        
+        // Add event listener to bank select
+        bankSelect.addEventListener('change', function() {
+            // Get the selected bank
+            const selectedBank = this.value;
+            
+            // Clear existing options
+            aaSelect.innerHTML = '';
+            
+            if (selectedBank) {
+                // Remove disabled attribute and class
+                aaSelect.removeAttribute('disabled');
+                aaSelect.classList.remove('disabled');
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select an Account Aggregator';
+                aaSelect.appendChild(defaultOption);
+                
+                // Get AA options for the selected bank
+                const aaOptions = bankToAAMapping[selectedBank] || [];
+                
+                // Add options to the AA select
+                aaOptions.forEach(aa => {
+                    const option = document.createElement('option');
+                    option.value = aa;
+                    option.textContent = aa;
+                    aaSelect.appendChild(option);
+                });
+            } else {
+                // If no bank is selected, disable the AA select
+                aaSelect.setAttribute('disabled', 'disabled');
+                aaSelect.classList.add('disabled');
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select a bank first';
+                aaSelect.appendChild(defaultOption);
+            }
+        });
+    </script>
+</body>
+</html>
