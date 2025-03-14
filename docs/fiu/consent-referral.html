@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank and AA Selection</title>
+    <title>Account Aggregator Waiting Screen</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,14 +20,11 @@
         h1 {
             margin-bottom: 30px;
         }
-        .form-container, .approval-container {
+        .form-container {
             padding: 20px;
             border-radius: 8px;
             background-color: #f8fafc;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .approval-container {
-            display: none;
         }
         .form-group {
             margin-bottom: 20px;
@@ -88,12 +85,40 @@
             font-size: 16px;
             white-space: nowrap;
         }
+        .registration-message {
+            padding: 15px;
+            background-color: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .waiting-container {
+            padding: 30px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+        .waiting-message {
+            padding: 20px;
+            background-color: #ebf8ff;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+        }
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            margin-bottom: 20px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             border-top-color: #4299e1;
             animation: spin 1s ease-in-out infinite;
@@ -101,61 +126,39 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .waiting-message {
-            display: none;
-            padding: 15px;
-            background-color: #ebf8ff;
-            border-left: 4px solid #4299e1;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-        }
-        .approval-panel {
-            background-color: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: center;
-        }
-        .approval-button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #48bb78;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
+        .timer {
+            font-size: 24px;
             font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.2s;
-        }
-        .approval-button:hover {
-            background-color: #38a169;
+            margin-top: 10px;
+            color: #4a5568;
         }
         .aa-header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         .aa-logo {
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             background-color: #4299e1;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 28px;
         }
-        .timer {
+        .aa-name {
+            font-size: 28px;
             font-weight: bold;
-            margin-left: 10px;
+            color: #2d3748;
+        }
+        .message-text {
+            font-size: 18px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -193,29 +196,24 @@
                 
                 <div id="buttonContainer" style="display: none;">
                     <button type="button" id="proceedButton" disabled>Proceed</button>
-                    
-                    <div id="waitingMessage" class="waiting-message" style="display: none;">
-                        <div class="loading-spinner"></div>
-                        <div>
-                            <p>Please open the <span id="aaAppName"></span> App and approve the consent.</p>
-                            <p>Time remaining: <span id="countdownTimer" class="timer">5:00</span></p>
-                        </div>
+                    <div id="registrationMessage" class="registration-message" style="display: none;">
+                        <div>Please register with <span id="registrationAAName"></span> first and come back to enter your AA handle.</div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
     
-    <div id="approvalSection" class="approval-container">
+    <div id="waitingSection" class="waiting-container" style="display: none; margin-top: 30px;">
         <div class="aa-header">
             <div class="aa-logo" id="aaLogo">A</div>
-            <h2 id="aaName">Anumati</h2>
+            <div class="aa-name" id="aaName">Account Aggregator</div>
         </div>
         
-        <div class="approval-panel">
-            <h3>Consent Request</h3>
-            <p>You are requested to approve sharing of your financial information with the application.</p>
-            <button class="approval-button">Approve Consent</button>
+        <div class="waiting-message">
+            <div class="loading-spinner"></div>
+            <div class="message-text">Please open the <span id="aaAppName"></span> App and approve the consent.</div>
+            <div class="timer">Time remaining: <span id="countdownTimer">5:00</span></div>
         </div>
     </div>
 
@@ -236,15 +234,16 @@
         const aaSuffix = document.getElementById('aaSuffix');
         const buttonContainer = document.getElementById('buttonContainer');
         const proceedButton = document.getElementById('proceedButton');
-        const waitingMessage = document.getElementById('waitingMessage');
-        const aaAppName = document.getElementById('aaAppName');
-        const countdownTimer = document.getElementById('countdownTimer');
+        const registrationMessage = document.getElementById('registrationMessage');
+        const registrationAAName = document.getElementById('registrationAAName');
         
-        // Get references to the sections
+        // Get references to the waiting section elements
         const formSection = document.getElementById('formSection');
-        const approvalSection = document.getElementById('approvalSection');
+        const waitingSection = document.getElementById('waitingSection');
         const aaNameDisplay = document.getElementById('aaName');
         const aaLogo = document.getElementById('aaLogo');
+        const aaAppName = document.getElementById('aaAppName');
+        const countdownTimer = document.getElementById('countdownTimer');
 
         // Add event listener to bank select
         bankSelect.addEventListener('change', function() {
@@ -298,29 +297,16 @@
             const selectedAA = this.value;
             
             if (selectedAA) {
-                // Show handle group
+                // Show handle group and button container
                 handleGroup.style.display = 'block';
+                buttonContainer.style.display = 'block';
                 
                 // Update the suffix text
                 aaSuffix.textContent = '@' + selectedAA;
                 
-                // Show the button container
-                buttonContainer.style.display = 'block';
-                
-                // Initially show the proceed button for all AAs
-                proceedButton.style.display = 'block';
-                waitingMessage.style.display = 'none';
-                
-                // Always show registration message until handle is entered
-                const registrationMessage = document.getElementById('registrationMessage') || document.createElement('div');
-                registrationMessage.id = 'registrationMessage';
-                registrationMessage.className = 'waiting-message';
+                // Show registration message
                 registrationMessage.style.display = 'flex';
-                registrationMessage.innerHTML = `<div>Please register with ${selectedAA} first and come back to enter your AA handle.</div>`;
-                
-                if (!document.getElementById('registrationMessage')) {
-                    buttonContainer.insertBefore(registrationMessage, waitingMessage);
-                }
+                registrationAAName.textContent = selectedAA;
             } else {
                 // Hide handle group and button container
                 handleGroup.style.display = 'none';
@@ -330,22 +316,16 @@
 
         // Add event listener to handle input
         aaHandle.addEventListener('input', function() {
-            const selectedAA = aaSelect.value;
             const handleValue = this.value.trim();
-            const registrationMessage = document.getElementById('registrationMessage');
             
             // Enable or disable proceed button based on whether handle is empty
             proceedButton.disabled = handleValue === '';
             
             // Hide registration message if handle is entered
             if (handleValue !== '') {
-                if (registrationMessage) {
-                    registrationMessage.style.display = 'none';
-                }
+                registrationMessage.style.display = 'none';
             } else {
-                if (registrationMessage) {
-                    registrationMessage.style.display = 'flex';
-                }
+                registrationMessage.style.display = 'flex';
             }
         });
 
@@ -357,23 +337,19 @@
             
             // Only proceed if handle is provided
             if (handleValue !== '') {
-                if (selectedAA === 'Anumati') {
-                    // For Anumati, show approval section
-                    formSection.style.display = 'none';
-                    approvalSection.style.display = 'block';
-                    
-                    // Update AA name display
-                    aaNameDisplay.textContent = selectedAA;
-                    aaLogo.textContent = selectedAA.charAt(0);
-                } else {
-                    // For other AAs, show waiting message with timer
-                    proceedButton.style.display = 'none';
-                    waitingMessage.style.display = 'flex';
-                    aaAppName.textContent = selectedAA;
-                    
-                    // Start countdown
-                    startCountdown(5 * 60); // 5 minutes in seconds
-                }
+                // Show waiting section, keep form section visible
+                waitingSection.style.display = 'block';
+                
+                // Update AA name and logo in waiting section
+                aaNameDisplay.textContent = selectedAA;
+                aaLogo.textContent = selectedAA.charAt(0);
+                aaAppName.textContent = selectedAA;
+                
+                // Start countdown
+                startCountdown(5 * 60); // 5 minutes in seconds
+                
+                // Disable proceed button to prevent multiple clicks
+                proceedButton.disabled = true;
             }
         });
 
