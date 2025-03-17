@@ -1,0 +1,504 @@
+<div id="accountsModal" class="login-modal">
+        <div class="login-container" style="max-width: 550px;">
+            <div class="login-header">
+                <span id="accountSelectionTitle">Select Accounts</span>
+                <button class="close-button" id="closeAccountsModal">&times;</button>
+            </div>
+            <div class="login-body">
+                <p>Choose the account(s) for which you want to provide the statement to HDFC:</p>
+                
+                <div class="accounts-list">
+                    <div class="account-option">
+                        <input type="checkbox" id="account1" name="account1">
+                        <label for="account1" class="account-label">
+                            <div class="account-name">Savings Account - 8752</div>
+                            <div class="account-number">XXXX XXXX 8752</div>
+                        </label>
+                    </div>
+                    
+                    <div class="account-option">
+                        <input type="checkbox" id="account2" name="account2">
+                        <label for="account2" class="account-label">
+                            <div class="account-name">Current Account - 1493</div>
+                            <div class="account-number">XXXX XXXX 1493</div>
+                        </label>
+                    </div>
+                    
+                    <div class="account-option">
+                        <input type="checkbox" id="account3" name="account3">
+                        <label for="account3" class="account-label">
+                            <div class="account-name">Credit Card - 6241</div>
+                            <div class="account-number">XXXX XXXX XXXX 6241</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <button id="submitAccountsButton" class="login-submit">Submit</button>
+            </div>
+            <div class="login-footer">
+                <small>Account information will be securely processed by <span class="provider-name">Yodlee</span> and shared with HDFC.</small>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .accounts-list {
+            margin-bottom: 20px;
+        }
+        .account-option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .account-option:hover {
+            background-color: #f7fafc;
+        }
+        .account-option input[type="checkbox"] {
+            margin-top: 5px;
+            width: auto;
+        }
+        .account-label {
+            margin-left: 10px;
+            flex: 1;
+            cursor: pointer;
+        }
+        .account-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        .account-number {
+            color: #718096;
+            font-size: 14px;
+        }
+        .success-message {
+            text-align: center;
+            padding: 30px;
+            color: #38a169;
+        }
+        .success-message h3 {
+            margin-bottom: 15px;
+            color: #38a169;
+        }
+    </style><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Selection with Yodlee Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #1a365d;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .section {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            width: 90%;
+            max-width: 450px;
+        }
+        .login-header {
+            background-color: #2d3748;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+        }
+        .login-body {
+            padding: 20px;
+        }
+        .bank-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .bank-logo-placeholder {
+            width: 120px;
+            height: 50px;
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #4a5568;
+            border-radius: 4px;
+        }
+        .captcha-container {
+            margin-bottom: 20px;
+            background-color: #f7fafc;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .captcha-image {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            letter-spacing: 5px;
+            background: linear-gradient(to bottom, #f0f4f8 0%, #d9e2ec 100%);
+            padding: 5px 10px;
+            border-radius: 4px;
+            position: relative;
+            display: inline-block;
+            user-select: none;
+        }
+        .captcha-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+        }
+        .login-footer {
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        .login-submit {
+            background-color: #48bb78;
+        }
+        .login-submit:hover {
+            background-color: #38a169;
+        }
+        .close-button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            width: auto;
+            height: auto;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        .secure-badge img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .yodlee-footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connect Your Bank Account</h1>
+    
+    <div class="section">
+        <div class="form-group">
+            <label for="bankSelect">Select your bank</label>
+            <select id="bankSelect" name="bank">
+                <option value="">Choose a bank</option>
+                <option value="ICICI">ICICI Bank</option>
+                <option value="SBI">State Bank of India</option>
+                <option value="AXIS">Axis Bank</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="providerSelect">Select feed provider</label>
+            <select id="providerSelect" name="provider" disabled>
+                <option value="">Choose a provider</option>
+                <option value="Yodlee">Yodlee</option>
+                <option value="Perfios">Perfios</option>
+            </select>
+        </div>
+        
+        <button id="connectButton" disabled>Connect to Bank</button>
+    </div>
+    
+    <div class="yodlee-footer" id="providerFooter" style="display: none;">
+        Powered by <span id="providerName">Yodlee</span> Bank Feed Technology
+        <br>
+        <small><span id="providerNameSmall">Yodlee</span> securely stores your credentials to maintain the connection to your bank</small>
+    </div>
+    
+    <div id="loginModal" class="login-modal">
+        <div class="login-container">
+            <div class="login-header">
+                <span id="bankName">Bank Net Banking</span>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <div class="login-body">
+                <div class="bank-logo">
+                    <div class="bank-logo-placeholder" id="bankLogo">BANK LOGO</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username / Customer ID</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password">
+                </div>
+                
+                <div class="captcha-container">
+                    <div class="form-group">
+                        <label for="captcha">Enter the text shown below</label>
+                        <div class="captcha-image" id="captchaImage">XJ9R2</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" id="captcha" name="captcha" placeholder="Enter captcha">
+                    </div>
+                </div>
+                
+                <button class="login-submit" id="loginButton">Login</button>
+                
+                <div class="secure-badge">
+                    <span>🔒 Secure connection</span>
+                </div>
+            </div>
+            <div class="login-footer">
+                <small>Your credentials are securely stored by <span class="provider-name">Yodlee</span> to maintain your bank connection. <span class="provider-name">Yodlee</span> uses bank-level encryption to protect your information.</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to elements
+        const providerSelect = document.getElementById('providerSelect');
+        const bankSelect = document.getElementById('bankSelect');
+        const connectButton = document.getElementById('connectButton');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.getElementById('closeModal');
+        const bankName = document.getElementById('bankName');
+        const bankLogo = document.getElementById('bankLogo');
+        const captchaImage = document.getElementById('captchaImage');
+        const providerFooter = document.getElementById('providerFooter');
+        const providerName = document.getElementById('providerName');
+        const providerNameSmall = document.getElementById('providerNameSmall');
+        const providerNameElements = document.querySelectorAll('.provider-name');
+        
+        // Account selection modal elements
+        const accountsModal = document.getElementById('accountsModal');
+        const closeAccountsModal = document.getElementById('closeAccountsModal');
+        const submitAccountsButton = document.getElementById('submitAccountsButton');
+        
+        // Enable provider select when bank is selected
+        bankSelect.addEventListener('change', function() {
+            const selectedBank = this.value;
+            
+            if (selectedBank) {
+                // Enable provider select
+                providerSelect.disabled = false;
+            } else {
+                // Disable provider select if no bank selected
+                providerSelect.disabled = true;
+                providerSelect.value = '';
+                connectButton.disabled = true;
+                providerFooter.style.display = 'none';
+            }
+        });
+        
+        // Enable connect button when a provider is selected
+        providerSelect.addEventListener('change', function() {
+            const selectedProvider = this.value;
+            
+            if (selectedProvider) {
+                // Enable connect button
+                connectButton.disabled = false;
+                
+                // Update provider name in footer
+                providerName.textContent = selectedProvider;
+                providerNameSmall.textContent = selectedProvider;
+                providerFooter.style.display = 'block';
+                
+                // Update provider name in all elements
+                providerNameElements.forEach(element => {
+                    element.textContent = selectedProvider;
+                });
+            } else {
+                // Disable connect button if no provider selected
+                connectButton.disabled = true;
+                providerFooter.style.display = 'none';
+            }
+        });
+        
+        // Show login modal when connect button is clicked
+        connectButton.addEventListener('click', function() {
+            const selectedBank = bankSelect.value;
+            
+            // Update bank name in the modal
+            bankName.textContent = getBankFullName(selectedBank) + ' Net Banking';
+            
+            // Update bank logo
+            bankLogo.textContent = selectedBank;
+            
+            // Generate random captcha
+            captchaImage.textContent = generateCaptcha();
+            
+            // Show the modal
+            loginModal.style.display = 'flex';
+        });
+        
+        // Close modal when close button is clicked
+        closeModal.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside the modal content
+        loginModal.addEventListener('click', function(event) {
+            if (event.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+        
+        // Close accounts modal when close button is clicked
+        closeAccountsModal.addEventListener('click', function() {
+            accountsModal.style.display = 'none';
+        });
+        
+        // Close accounts modal when clicking outside the modal content
+        accountsModal.addEventListener('click', function(event) {
+            if (event.target === accountsModal) {
+                accountsModal.style.display = 'none';
+            }
+        });
+        
+        // Get login button reference
+        const loginButton = document.getElementById('loginButton');
+        
+        // Handle login button click
+        loginButton.addEventListener('click', function() {
+            // Hide login modal
+            loginModal.style.display = 'none';
+            
+            // Show accounts modal
+            accountsModal.style.display = 'flex';
+        });
+        
+        // Handle accounts submission
+        submitAccountsButton.addEventListener('click', function() {
+            // Replace the content with success message
+            const accountsContainer = this.closest('.login-container');
+            const loginBody = accountsContainer.querySelector('.login-body');
+            
+            loginBody.innerHTML = `
+                <div class="success-message">
+                    <h3>Accounts Connected Successfully!</h3>
+                    <p>Your selected accounts have been successfully connected to HDFC.</p>
+                    <p>You may close this window.</p>
+                </div>
+            `;
+        });
+        
+        // Function to get full bank name
+        function getBankFullName(bankCode) {
+            const banks = {
+                'ICICI': 'ICICI Bank',
+                'SBI': 'State Bank of India',
+                'AXIS': 'Axis Bank'
+            };
+            
+            return banks[bankCode] || bankCode;
+        }
+        
+        // Function to generate random captcha
+        function generateCaptcha() {
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let captcha = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const randomIndex = Math.floor(Math.random() * chars.length);
+                captcha += chars[randomIndex];
+            }
+            
+            return captcha;
+        }
+    </script>
+</body>
+</html>
